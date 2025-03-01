@@ -26,7 +26,7 @@ const add = async (interaction) => {
     id,
     "Pending",
   ];
-  await appendSheetData(`${CONFIG.sheets.ranges.tracker}A1`, [data]);
+  await appendSheetData(`${CONFIG.sheets.ranges.goldPayment}A1`, [data]);
   await interaction.reply({
     content: `Added ${amount} to ${namerealm}`,
   });
