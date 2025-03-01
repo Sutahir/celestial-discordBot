@@ -1,4 +1,4 @@
-const { connectToGoogleSheets } = require("../utils/submit");
+const { connectToGoogleSheets } = require("./sheet");
 require("dotenv").config();
 const goldprice = async (interaction) => {
   await interaction.deferReply({ ephemeral: true });

@@ -5,7 +5,9 @@ const {
   ActionRowBuilder,
   InteractionType,
 } = require("discord.js");
-const { addvalue, getCurrentTimestamp } = require("../utils/submit");
+const { getCurrentTimestamp } = require("../utils/sheet");
+const { getSheetData, appendSheetData } = require("../utils/sheet");
+const { CONFIG } = require("../utils/config");
 
 const payment = async (interaction) => {
   try {
@@ -41,7 +43,7 @@ const payment = async (interaction) => {
           boostIdFieldValue = field.value;
           break;
         case "Selected Booster":
-          selectedBoosterFieldValue = field.value;
+          selectedBoosterFieldValue = field.value.replace(/<@|>/g, "");
           break;
       }
     });
@@ -110,7 +112,9 @@ const handleModalSubmit = async (interaction) => {
     // Send an immediate response to acknowledge receipt of the interaction
     try {
       await interaction.deferUpdate();
-
+      const balanceSheetData = await getSheetData(
+        CONFIG.sheets.ranges.balanceSheet
+      );
       const title = interaction.fields.getTextInputValue("title");
 
       const amountInput = interaction.fields.getTextInputValue("amount");
@@ -120,21 +124,33 @@ const handleModalSubmit = async (interaction) => {
       const boostID = interaction.fields.getTextInputValue("id");
       const tag = interaction.fields.getTextInputValue("tagInput");
 
+      // Check if namerealm is present in balanceSheetData[0]
+      const namerealm = balanceSheetData.find(
+        (row) => row[0] === interaction.user.id
+      )?.[1];
+      if (!namerealm) {
+        await interaction.editReply({
+          content: "Please add name-realm first, then try again.",
+        });
+        return;
+      }
+
       // Process the data as needed
       const rawdata = [
         getCurrentTimestamp(),
-        amount * 1000,
-        "Levelling",
         tag,
-        "",
-        "",
-        "",
+        namerealm,
+        amount * 1000,
+        "Automated payment",
+        "levelup",
+        interaction.user.displayName,
         boostID,
+        "Pending",
       ];
-      await addvalue("Boost", [rawdata]);
+      await appendSheetData("Gold Payment!A1", [rawdata]);
 
       // Construct the message
-      const message = `Balance Added for <@${tag}> by ${interaction.user.displayName} \nTitle: ${title}\nAmount: ${amount}K\nBoost ID: ${boostID}`;
+      const message = `Balance Added for <@${tag}> by ${interaction.user.displayName} \nTitle: ${title}\nAmount: ${amount}K\nBoost ID: ${boostID}\nName-Realm: ${namerealm}`;
 
       // Ensure the interaction's channel is valid
       if (interaction.channel) {

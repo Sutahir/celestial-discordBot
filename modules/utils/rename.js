@@ -1,6 +1,7 @@
 require("dotenv").config(); // Import dotenv to load environment variables
 const { PermissionsBitField, EmbedBuilder } = require("discord.js");
-const { connectToGoogleSheets } = require("./submit");
+const { getSheetData, updateSheetData, appendSheetData } = require("./sheet");
+const { CONFIG } = require("./config");
 
 const channelId = "1302059080105594880"; // Channel ID for logging
 
@@ -11,7 +12,7 @@ const rename = async (message) => {
 
   try {
     const details = message.content.split(" ");
-    
+
     // Check if the command is in the format !rename <User> <newName>
     if (details.length === 3) {
       const userMention = details[1]; // The tagged user mention
@@ -19,7 +20,9 @@ const rename = async (message) => {
 
       // Check if the author has the required role
       if (!member.roles.cache.has("1231894640802791424")) {
-        await message.author.send("You do not have permission to rename users.");
+        await message.author.send(
+          "You do not have permission to rename users."
+        );
         return;
       }
 
@@ -29,7 +32,9 @@ const rename = async (message) => {
       // Extract the user ID from the mention (format: <@userID>)
       const userIdMatch = userMention.match(/^<@!?(\d+)>$/);
       if (!userIdMatch) {
-        await message.author.send("Invalid user mention. Please tag a user correctly.");
+        await message.author.send(
+          "Invalid user mention. Please tag a user correctly."
+        );
         return;
       }
 
@@ -39,19 +44,25 @@ const rename = async (message) => {
       // Debugging: log the result of user lookup
       if (!targetMember) {
         console.error(`User not found: ${userId}.`);
-        await message.author.send("User not found. Check the username and try again.");
+        await message.author.send(
+          "User not found. Check the username and try again."
+        );
         return;
       }
 
       // If all checks pass, set the new nickname
       await targetMember.setNickname(newName);
       await updateName([userId, newName]);
-      await message.author.send(`Character name updated successfully for ${targetMember.displayName} to ${newName}`);
+      await message.author.send(
+        `Character name updated successfully for ${targetMember.displayName} to ${newName}`
+      );
 
       // Log the action
       logChannel = message.guild.channels.cache.get(channelId); // Get the logging channel
       if (logChannel) {
-        await logChannel.send(`User ${targetMember} renamed to ${newName} by ${message.author}`);
+        await logChannel.send(
+          `User ${targetMember} renamed to ${newName} by ${message.author}`
+        );
       }
     } else if (details.length === 2) {
       // If the command is in the format !rename character-realm
@@ -69,7 +80,7 @@ const rename = async (message) => {
 
       if (regex.test(newName)) {
         const [charName, realmName] = newName.split("-");
-        const validRealms = ["kazzak", "tarrenmill", "twistingnether"];
+        const validRealms = ["kazzak"];
 
         if (!validRealms.includes(realmName.toLowerCase())) {
           await message.author.send(
@@ -105,7 +116,9 @@ const rename = async (message) => {
         );
       }
     } else {
-      await message.author.send("Invalid command format. Please use `!rename <User> <newName>` or `!rename <character-realm>`.");
+      await message.author.send(
+        "Invalid command format. Please use `!rename <User> <newName>` or `!rename <character-realm>`."
+      );
     }
 
     // Delete the original message
@@ -128,62 +141,37 @@ const rename = async (message) => {
 
 const updateName = async ([id, name]) => {
   try {
-    const sheets = await connectToGoogleSheets();
+    // Use getSheetData instead of direct API calls
+    const sheetData = await getSheetData(CONFIG.sheets.ranges.balanceSheet);
 
-    // Fetch data from the spreadsheet
-    const {
-      data: { values: response },
-    } = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Balance Sheet!A:B`, // Adjust the range as necessary
-    });
-
-    if (!response || response.length === 0) {
+    if (!sheetData || sheetData.length === 0) {
       console.error("No data found in the sheet. Adding new entry.");
-      await sheets.spreadsheets.values.append({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: `Balance Sheet!A:B`, // Append to the end of the list
-        valueInputOption: "RAW",
-        resource: {
-          values: [[name, id]], // Add new row with name and ID
-        },
-      });
+      await appendSheetData(CONFIG.sheets.ranges.balanceSheet, [[id, name]]);
       console.log(`Added new entry with User ID ${id} and name ${name}.`);
       return;
     }
 
     // Populate the Map
     const userMap = new Map();
-    response.slice(1).forEach((row, index) => {
-      const userId = row[1]; // Get user ID from the second column
-      userMap.set(userId, index + 1); // Store the user ID with its index (accounting for the header)
+    sheetData.forEach((row, index) => {
+      if (row && row.length > 0) {
+        const userId = row[0]; // Get user ID from the first column
+        userMap.set(userId, index); // Store the user ID with its index
+      }
     });
 
     const index = userMap.get(id); // Get the index for the specified user ID
 
     if (index !== undefined) {
       // If the ID exists, update the name
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: `Balance Sheet!A${index + 1}`, // Update the corresponding name
-        valueInputOption: "RAW",
-        resource: {
-          values: [[name]], // New name to update
-        },
-      });
-
+      const updateRange = `${
+        CONFIG.sheets.ranges.balanceSheet.split("!")[0]
+      }!B${index + 1}`;
+      await updateSheetData(updateRange, [[name]]);
       console.log(`Successfully updated User ID ${id} with name ${name}.`);
     } else {
       // If the ID does not exist, append a new entry
-      await sheets.spreadsheets.values.append({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: `Balance Sheet!A:B`, // Append to the end of the list
-        valueInputOption: "RAW",
-        resource: {
-          values: [[name, id]], // Add new row with name and ID
-        },
-      });
-
+      await appendSheetData(CONFIG.sheets.ranges.balanceSheet, [[id, name]]);
       console.log(`Added new entry with User ID ${id} and name ${name}.`);
     }
   } catch (error) {

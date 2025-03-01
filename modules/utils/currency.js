@@ -1,4 +1,4 @@
-const { connectToGoogleSheets } = require("./submit");
+const { connectToGoogleSheets } = require("./sheet");
 require("dotenv").config();
 const { google } = require("googleapis");
 const { EmbedBuilder, Colors } = require("discord.js"); // Ensure you import Colors
@@ -37,7 +37,7 @@ const payment = async (message) => {
   try {
     console.log(message.content);
     const content = JSON.parse(message.content);
-    
+
     if (content) {
       const discordID = parseInt(content.discordid, 10);
       const duration = content.duration;
@@ -57,10 +57,12 @@ const payment = async (message) => {
       }
 
       // Fetch the member to make sure we are not missing anyone due to caching
-      const member = await message.guild.members.fetch(discordID).catch(err => {
-        console.error("Error fetching member:", err);
-        return null;
-      });
+      const member = await message.guild.members
+        .fetch(discordID)
+        .catch((err) => {
+          console.error("Error fetching member:", err);
+          return null;
+        });
 
       if (!member) {
         console.error("Member not found in guild:", discordID);
@@ -69,7 +71,7 @@ const payment = async (message) => {
 
       // Check if member has a valid User instance and can receive DMs
       const user = member.user;
-      if (!user || typeof user.send !== 'function') {
+      if (!user || typeof user.send !== "function") {
         console.error("User instance not found or cannot send messages");
         return;
       }
@@ -87,4 +89,4 @@ const payment = async (message) => {
   }
 };
 
-module.exports = { currency , payment};
+module.exports = { currency, payment };
