@@ -1,0 +1,9 @@
+[Sun Dec 01 2024 04:16:18 GMT-0800 (Pacific Standard Time)] Celestial#1580: 
+[Sun Dec 01 2024 04:16:18 GMT-0800 (Pacific Standard Time)] Celestial#1580: <@&1254443951004454942> <@&1300843433774153789>
+# nostack
+## NW
+Signup Template:
+### Spec + Score + key/no key + ilvl
+# baraye daryaft rank va take kardan  <#1235481989138874389> .
+[Sun Dec 01 2024 04:30:18 GMT-0800 (Pacific Standard Time)] celestial_boost: <@&1300843433774153789> <@&1254443951004454942>
+[Sun Dec 01 2024 04:46:40 GMT-0800 (Pacific Standard Time)] celestial_boost: !done
