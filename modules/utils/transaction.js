@@ -55,51 +55,45 @@ const transaction = async (message, client) => {
 
           const user = await client.users.fetch(userId);
 
+          // Get color based on action type
+          let embedColor = 0x3498db; // Default blue
+          let statusMessage = "";
+
+          switch (action) {
+            case "paid":
+              embedColor = 0x00ff00; // Green
+              statusMessage = "Payment has been marked as PAID";
+              break;
+            case "pending":
+              embedColor = 0xffa500; // Orange
+              statusMessage = "Payment has been marked as PENDING";
+              break;
+            case "cancelled":
+              embedColor = 0xff0000; // Red
+              statusMessage = "Payment has been marked as CANCELLED";
+              break;
+            case "create":
+              embedColor = 0x3498db; // Blue
+              statusMessage = "Payment request has been CREATED";
+              break;
+            default:
+              statusMessage = `Payment status has been updated to: ${
+                action || "Unknown"
+              }`;
+          }
+
+          // Create a simplified embed with just the status change information
           const embedToSend = {
-            color: action === "paid" ? 0x00ff00 : 0x3498db, // Green for "paid", Blue for "create"
-            title:
-              action === "paid"
-                ? "Payment Confirmation"
-                : "Transaction Details",
-            description:
-              action === "paid"
-                ? "پرداختی شما انجام شد.تا سیکل بعدی پایا پول برایتان واریز میشود."
-                : "مشخصات واریزی :",
-            fields:
-              action === "paid"
-                ? [
-                    {
-                      name: "Mablagh Pardakhty",
-                      value: `${gheymat} Rial`,
-                      inline: true,
-                    },
-                    { name: "Admin", value: admin, inline: true },
-                    { name: "ID", value: uniqueID, inline: false },
-                    { name: "شماره شبا", value: sheba, inline: false },
-                    { name: "نام صاحب حساب", value: name, inline: false },
-                  ]
-                : [
-                    { name: "Amount", value: amount, inline: true },
-                    { name: "Price", value: price, inline: true },
-                    {
-                      name: "Mablagh Pardakhty",
-                      value: `${gheymat} Rial`,
-                      inline: true,
-                    },
-                    {
-                      name: "Payment Duration",
-                      value: paymentDuration,
-                      inline: true,
-                    },
-                    { name: "Game", value: game, inline: true },
-                    { name: "Admin", value: admin, inline: true },
-                    { name: "Note", value: note, inline: false },
-                    { name: "ID", value: uniqueID, inline: false },
-                    { name: "شماره شبا", value: sheba, inline: false },
-                    { name: "نام صاحب حساب", value: name, inline: false },
-                  ],
+            color: embedColor,
+            title: "Payment Status Update",
+            description: statusMessage,
+            fields: [
+              { name: "Payment ID", value: uniqueID, inline: false },
+              { name: "Amount", value: `${gheymat} Rial`, inline: true },
+              { name: "Updated By", value: admin, inline: true },
+            ],
             footer: {
-              text: `Requested by ${message.author.username}`,
+              text: `Processed by ${message.author.username}`,
               icon_url: message.author.displayAvatarURL(),
             },
             timestamp: new Date(),
@@ -107,15 +101,13 @@ const transaction = async (message, client) => {
 
           await user.send({ embeds: [embedToSend] });
           console.log(
-            `${
-              action === "paid" ? "Paid" : "Create"
-            } embed sent to the user successfully!`
+            `Status update (${action}) sent to the user successfully!`
           );
 
           // React to the message with a green checkmark
           await message.react("✅");
 
-          // DM specific users if paymentDuration is "lahzei" and action is "create"
+          // DM specific users if paymentDuration is "1-3 saat" and action is "create"
           if (paymentDuration === "1-3 saat" && action === "create") {
             const user1 = await client.users.fetch("339703905166426114");
             const user2 = await client.users.fetch("180032303303491584");
@@ -136,7 +128,7 @@ const transaction = async (message, client) => {
                 { name: "Game", value: game, inline: true },
                 { name: "Admin", value: admin, inline: true },
                 { name: "Note", value: note, inline: false },
-                { name: "ID", value: uniqueID, inline: false },
+                { name: "Payment ID", value: uniqueID, inline: false },
                 { name: "شماره شبا", value: sheba, inline: false },
                 { name: "نام صاحب حساب", value: name, inline: false },
               ],
