@@ -141,7 +141,7 @@ const rename = async (message) => {
 
 const updateName = async ([id, name]) => {
   try {
-    // Use getSheetData instead of direct API calls
+    // Use getSheetData instead of direct API calls - this will automatically use the correct spreadsheet
     const sheetData = await getSheetData(CONFIG.sheets.ranges.balanceSheet);
 
     if (!sheetData || sheetData.length === 0) {
@@ -163,14 +163,14 @@ const updateName = async ([id, name]) => {
     const index = userMap.get(id); // Get the index for the specified user ID
 
     if (index !== undefined) {
-      // If the ID exists, update the name
+      // If the ID exists, update the name - automatically uses the correct spreadsheet
       const updateRange = `${
         CONFIG.sheets.ranges.balanceSheet.split("!")[0]
       }!B${index + 1}`;
       await updateSheetData(updateRange, [[name]]);
       console.log(`Successfully updated User ID ${id} with name ${name}.`);
     } else {
-      // If the ID does not exist, append a new entry
+      // If the ID does not exist, append a new entry - automatically uses the correct spreadsheet
       await appendSheetData(CONFIG.sheets.ranges.balanceSheet, [[id, name]]);
       console.log(`Added new entry with User ID ${id} and name ${name}.`);
     }

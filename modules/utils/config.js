@@ -4,13 +4,14 @@ require("dotenv").config();
 // Centralized configuration
 const CONFIG = {
   sheets: {
-    cacheTime: 15 * 1000, // 15 seconds cache duration
-    sheetId: process.env.GOOGLE_SHEET_ID,
-
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    adminSheetId: process.env.ADMIN_SPREADSHEET_ID, // Spreadsheet for Payments
+    celestialSheetId: process.env.CELESTIAL_SPREADSHEET_ID, // Spreadsheet for Gold Payments and Balance
     ranges: {
-      goldPayment: "Gold Payment!A:J",
-      payment: "Payment!A:P",
-      balanceSheet: "Balance Name!A:B",
+      balanceSheet: "Balance Sheet!A:B", // Corrected range name with space
+      goldPayment: "Gold Payment!A:Z",
+      payment: "Payment!A:Z", // In ADMIN spreadsheet
+      // ... other ranges
     },
   },
   channels: {

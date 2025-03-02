@@ -145,7 +145,6 @@ const handleModalSubmit = async (interaction) => {
         "levelup",
         interaction.user.displayName,
         boostID,
-        "Pending",
       ];
       await appendSheetData("Gold Payment!A1", [rawdata]);
 

@@ -24,11 +24,10 @@ const add = async (interaction) => {
     "Others",
     interaction.user.username,
     id,
-    "Pending",
   ];
-  await appendSheetData(`${CONFIG.sheets.ranges.goldPayment}A1`, [data]);
+  await appendSheetData(`Gold Payment!A3`, [data]);
   await interaction.reply({
-    content: `Added ${amount} to ${namerealm}`,
+    content: `Added ${amount} to ${namerealm} for ${user} \n${note} \n${id}`,
   });
   user.send({
     content: `New payment added to your account`,

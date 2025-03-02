@@ -25,8 +25,9 @@ const attendance = async (message) => {
     const booster = details[2];
 
     const discordID = booster.replace(/<@!?|>/g, "");
-    const namerealm = balanceSheet.find((row) => row[0] === discordID)?.[1];
 
+    const namerealm = balanceSheet.find((row) => row[1] === discordID)?.[0];
+    console.log(namerealm);
     const price = priceInput.replace(/k/i, "").trim();
 
     if (isNaN(price) || price <= 0) {
@@ -59,7 +60,6 @@ const attendance = async (message) => {
       "Mplus",
       message.author.displayName,
       attendanceId,
-      "Pending",
     ];
     // Append data to Google Sheets
     await appendSheetData("Gold Payment!A1", [rawdata]);
