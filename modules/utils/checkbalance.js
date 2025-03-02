@@ -24,7 +24,8 @@ async function balance(message) {
     // Find user in balance sheet
     const userRow = balanceSheet.find((row) => row[0] === userId);
 
-    const userName = userRow[1] || "Unknown";
+    // Check if userRow is found and has the expected structure
+    const userName = userRow && userRow[1] ? userRow[1] : "Unknown";
 
     // Filter gold payments for this user
     // Order: Date(0), Discord ID(1), Name-Realm(2), Amount(3), Note(4), Category(5), Admin(6), Payment ID(7), Status(8), Who Paid(9)

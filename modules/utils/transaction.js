@@ -95,7 +95,7 @@ const transaction = async (message, client) => {
             description: statusMessage,
             fields: [
               { name: "Payment ID", value: uniqueID, inline: false },
-              { name: "Amount", value: `${gheymat} Toman`, inline: true },
+              { name: "Amount", value: `${gheymat} Rial`, inline: true },
               { name: "Game", value: game, inline: true },
               {
                 name: "Payment Duration",
