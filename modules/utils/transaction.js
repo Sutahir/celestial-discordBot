@@ -2,40 +2,39 @@ const transaction = async (message, client) => {
   try {
     if (message.embeds.length > 0) {
       const embed = message.embeds[0];
-
       if (embed.fields && Array.isArray(embed.fields)) {
-        const idField = embed.fields.find((field) => field.name === "id");
+        const idField = embed.fields.find((field) => field.name == "id");
 
         if (idField) {
           const userId = idField.value;
 
           const gheymatField = embed.fields.find(
-            (field) => field.name === "Gheymat"
+            (field) => field.name == "Gheymat"
           );
           const adminField = embed.fields.find(
-            (field) => field.name === "Admin"
+            (field) => field.name == "Admin"
           );
           const uniqueIDField = embed.fields.find(
             (field) => field.name === "payment id"
           );
           const actionField = embed.fields.find(
-            (field) => field.name === "action"
+            (field) => field.name == "action"
           );
           const amountField = embed.fields.find(
-            (field) => field.name === "Amount"
+            (field) => field.name == "Amount"
           );
           const priceField = embed.fields.find(
-            (field) => field.name === "Price"
+            (field) => field.name == "Price"
           );
           const paymentDurationField = embed.fields.find(
-            (field) => field.name === "Payment Duration"
+            (field) => field.name == "Payment Duration"
           );
           const gameField = embed.fields.find((field) => field.name === "Game");
           const noteField = embed.fields.find((field) => field.name === "Note");
           const shebaField = embed.fields.find(
-            (field) => field.name === "Sheba"
+            (field) => field.name == "Sheba"
           );
-          const nameField = embed.fields.find((field) => field.name === "Name");
+          const nameField = embed.fields.find((field) => field.name == "Name");
 
           const gheymat = gheymatField ? gheymatField.value : "Not available";
           const admin = adminField ? adminField.value : "Not available";
@@ -58,7 +57,6 @@ const transaction = async (message, client) => {
           // Get color based on action type
           let embedColor = 0x3498db; // Default blue
           let statusMessage = "";
-
           switch (action) {
             case "paid":
               embedColor = 0x00ff00; // Green
@@ -89,7 +87,6 @@ const transaction = async (message, client) => {
             description: statusMessage,
             fields: [
               { name: "Payment ID", value: uniqueID, inline: false },
-              { name: "Amount", value: `${gheymat} Rial`, inline: true },
               { name: "Updated By", value: admin, inline: true },
             ],
             footer: {

@@ -46,9 +46,6 @@ const hasRole = async (message, roleId) => {
  */
 const handler = async (message, client) => {
   try {
-    // Skip messages from bots to prevent feedback loops
-    if (message.author.bot) return;
-
     // Handle transaction processing
     if (
       message.channel.id === CONFIG.channels.payment &&
