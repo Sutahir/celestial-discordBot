@@ -24,12 +24,6 @@ async function balance(message) {
     // Find user in balance sheet
     const userRow = balanceSheet.find((row) => row[0] === userId);
 
-    if (!userRow) {
-      return message.channel.send(
-        "❌ **Account Not Found**: Your Discord ID was not found in our records."
-      );
-    }
-
     const userName = userRow[1] || "Unknown";
 
     // Filter gold payments for this user
@@ -50,7 +44,8 @@ async function balance(message) {
       }, 0);
 
       const totalTomanPayments = payments.reduce((total, payment) => {
-        const amount = parseFloat(payment[3].replace(/[^\d.-]/g, "")) || 0;
+        const amount =
+          Math.floor(payment[3].replace(/[^\d.-]/g, "")).toLocaleString() || 0;
         return total + (payment[14] === "Done" ? amount : 0);
       }, 0);
 

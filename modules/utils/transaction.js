@@ -57,40 +57,65 @@ const transaction = async (message, client) => {
           // Get color based on action type
           let embedColor = 0x3498db; // Default blue
           let statusMessage = "";
+
+          // Use a consistent title for all embeds
+          const embedTitle = "Payment Transaction Update";
+
           switch (action) {
             case "paid":
               embedColor = 0x00ff00; // Green
-              statusMessage = "Payment has been marked as PAID";
+              statusMessage = "Your payment has been marked as **PAID**";
               break;
             case "pending":
               embedColor = 0xffa500; // Orange
-              statusMessage = "Payment has been marked as PENDING";
+              statusMessage = "Your payment has been marked as **PENDING**";
               break;
             case "cancelled":
               embedColor = 0xff0000; // Red
-              statusMessage = "Payment has been marked as CANCELLED";
+              statusMessage = "Your payment has been marked as **CANCELLED**";
               break;
             case "create":
               embedColor = 0x3498db; // Blue
-              statusMessage = "Payment request has been CREATED";
+              statusMessage = "Your payment request has been **CREATED**";
+              break;
+            case "edit":
+              embedColor = 0x9b59b6; // Purple
+              statusMessage = "Your payment details have been **EDITED**";
               break;
             default:
-              statusMessage = `Payment status has been updated to: ${
+              statusMessage = `Your payment status has been updated to: **${
                 action || "Unknown"
-              }`;
+              }**`;
           }
 
-          // Create a simplified embed with just the status change information
+          // Create a detailed embed with comprehensive information
           const embedToSend = {
             color: embedColor,
-            title: "Payment Status Update",
+            title: embedTitle,
             description: statusMessage,
             fields: [
               { name: "Payment ID", value: uniqueID, inline: false },
+              { name: "Amount", value: `${gheymat} Toman`, inline: true },
+              { name: "Game", value: game, inline: true },
+              {
+                name: "Payment Duration",
+                value: paymentDuration,
+                inline: true,
+              },
+              {
+                name: "Note",
+                value: note || "No notes provided",
+                inline: false,
+              },
               { name: "Updated By", value: admin, inline: true },
+              {
+                name: "Status",
+                value: action ? action.toUpperCase() : "Unknown",
+                inline: true,
+              },
             ],
             footer: {
-              text: `Processed by ${message.author.username}`,
+              text: `Processed on ${new Date().toLocaleString()}`,
               icon_url: message.author.displayAvatarURL(),
             },
             timestamp: new Date(),
@@ -98,7 +123,7 @@ const transaction = async (message, client) => {
 
           await user.send({ embeds: [embedToSend] });
           console.log(
-            `Status update (${action}) sent to the user successfully!`
+            `Status update (${action}) sent to the user successfully with improved details!`
           );
 
           // React to the message with a green checkmark
@@ -110,7 +135,7 @@ const transaction = async (message, client) => {
             const user2 = await client.users.fetch("180032303303491584");
             const notificationEmbed = {
               color: 0xff0000, // Red color for notification
-              title: "Immediate Payment Notification",
+              title: embedTitle, // Use the same title for consistency
               description:
                 "A transaction with immediate payment duration has been created.",
               fields: [
