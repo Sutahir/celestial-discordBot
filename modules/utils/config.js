@@ -17,7 +17,7 @@ const CONFIG = {
     applicationsSource: "1231657838863192136",
     applicationsDestination: "1254199483726565486",
     balanceCommand: "1262534348993855619",
-    payment: "1263138558139564163",
+    payment: "1318601642144170155",
     mplusBooking: "1301933098426171402",
     balanceAdd: "1264335663558430741",
     transcriptDestination: "1264699919415906444",

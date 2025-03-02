@@ -81,7 +81,7 @@ const handler = async (message, client) => {
     // Handle currency command
     if (
       message.channel.id === CONFIG.channels.payment &&
-      message.author.id === "1263138676196638720"
+      message.author.id === "1263138558139564163"
     ) {
       await currency(message);
       return;
