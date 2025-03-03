@@ -3,117 +3,136 @@ const transaction = async (message, client) => {
     if (message.embeds.length > 0) {
       const embed = message.embeds[0];
       if (embed.fields && Array.isArray(embed.fields)) {
-        const idField = embed.fields.find((field) => field.name == "id");
+        const idField = embed.fields.find((field) => field.name === "id");
 
         if (idField) {
           const userId = idField.value;
 
+          // Extract all potential fields (some may be undefined based on action type)
+          const amountField = embed.fields.find(
+            (field) => field.name === "Amount"
+          );
+          const priceField = embed.fields.find(
+            (field) => field.name === "Price"
+          );
           const gheymatField = embed.fields.find(
-            (field) => field.name == "Gheymat"
+            (field) => field.name === "Gheymat"
           );
+          const paymentDurationField = embed.fields.find(
+            (field) => field.name === "Payment Duration"
+          );
+          const gameField = embed.fields.find((field) => field.name === "Game");
           const adminField = embed.fields.find(
-            (field) => field.name == "Admin"
+            (field) => field.name === "Admin"
           );
+          const noteField = embed.fields.find((field) => field.name === "Note");
           const uniqueIDField = embed.fields.find(
             (field) => field.name === "payment id"
           );
           const actionField = embed.fields.find(
-            (field) => field.name == "action"
+            (field) => field.name === "action"
           );
-          const amountField = embed.fields.find(
-            (field) => field.name == "Amount"
-          );
-          const priceField = embed.fields.find(
-            (field) => field.name == "Price"
-          );
-          const paymentDurationField = embed.fields.find(
-            (field) => field.name == "Payment Duration"
-          );
-          const gameField = embed.fields.find((field) => field.name === "Game");
-          const noteField = embed.fields.find((field) => field.name === "Note");
           const shebaField = embed.fields.find(
-            (field) => field.name == "Sheba"
+            (field) => field.name === "Sheba"
           );
-          const nameField = embed.fields.find((field) => field.name == "Name");
+          const nameField = embed.fields.find((field) => field.name === "Name");
 
-          const gheymat = gheymatField ? gheymatField.value : "Not available";
+          // Get values or defaults
+          const amount = amountField ? amountField.value : "";
+          const price = priceField ? priceField.value : "";
+          const gheymat = gheymatField ? gheymatField.value : "";
+          const paymentDuration = paymentDurationField
+            ? paymentDurationField.value
+            : "";
+          const game = gameField ? gameField.value : "";
           const admin = adminField ? adminField.value : "Not available";
+          const note = noteField ? noteField.value : "";
           const uniqueID = uniqueIDField
             ? uniqueIDField.value
             : "Not available";
-          const action = actionField ? actionField.value.toLowerCase() : null;
-          const amount = amountField ? amountField.value : "Not available";
-          const price = priceField ? priceField.value : "Not available";
-          const paymentDuration = paymentDurationField
-            ? paymentDurationField.value
-            : "Not available";
-          const game = gameField ? gameField.value : "Not available";
-          const note = noteField ? noteField.value : "Not available";
-          const sheba = shebaField ? shebaField.value : "Not available";
-          const name = nameField ? nameField.value : "Not available";
+          const action = actionField ? actionField.value.toLowerCase() : "";
+          const sheba = shebaField ? shebaField.value : "";
+          const name = nameField ? nameField.value : "";
 
           const user = await client.users.fetch(userId);
 
-          // Get color based on action type
-          let embedColor = 0x3498db; // Default blue
-          let statusMessage = "";
-
-          // Use a consistent title for all embeds
+          // Default embed color and title
+          const embedColor = 3066993; // Green color for both create and paid
           const embedTitle = "Payment Transaction Update";
 
-          switch (action) {
-            case "paid":
-              embedColor = 0x00ff00; // Green
-              statusMessage = "Your payment has been marked as **PAID**";
-              break;
-            case "pending":
-              embedColor = 0xffa500; // Orange
-              statusMessage = "Your payment has been marked as **PENDING**";
-              break;
-            case "cancelled":
-              embedColor = 0xff0000; // Red
-              statusMessage = "Your payment has been marked as **CANCELLED**";
-              break;
-            case "create":
-              embedColor = 0x3498db; // Blue
-              statusMessage = "Your payment request has been **CREATED**";
-              break;
-            case "edit":
-              embedColor = 0x9b59b6; // Purple
-              statusMessage = "Your payment details have been **EDITED**";
-              break;
-            default:
-              statusMessage = `Your payment status has been updated to: **${
-                action || "Unknown"
-              }**`;
-          }
+          let fields = [];
+          let statusMessage = "";
 
-          // Create a detailed embed with comprehensive information
-          const embedToSend = {
-            color: embedColor,
-            title: embedTitle,
-            description: statusMessage,
-            fields: [
-              { name: "Payment ID", value: uniqueID, inline: false },
-              { name: "Amount", value: `${gheymat} Rial`, inline: true },
-              { name: "Game", value: game, inline: true },
+          // Determine message and fields based on action type
+          if (action === "create") {
+            statusMessage = "Your payment request has been **CREATED**";
+
+            fields = [
+              { name: "Amount", value: amount, inline: true },
+              { name: "Price", value: price, inline: true },
+              { name: "Gheymat", value: gheymat, inline: true },
               {
                 name: "Payment Duration",
                 value: paymentDuration,
                 inline: true,
               },
+              { name: "Game", value: game, inline: true },
+              { name: "Admin", value: admin, inline: true },
               {
                 name: "Note",
                 value: note || "No notes provided",
                 inline: false,
               },
-              { name: "Updated By", value: admin, inline: true },
+              { name: "Payment ID", value: uniqueID, inline: false },
+              { name: "Sheba", value: sheba, inline: false },
+              { name: "Name", value: name, inline: false },
+            ];
+          } else if (action === "paid") {
+            statusMessage = "Your payment has been marked as **PAID**";
+
+            fields = [
+              { name: "Payment ID", value: uniqueID, inline: false },
+              { name: "Gheymat", value: gheymat, inline: true },
+              { name: "Admin", value: admin, inline: true },
+              {
+                name: "Note",
+                value: note || "No notes provided",
+                inline: false,
+              },
+              { name: "Sheba", value: sheba, inline: false },
+              { name: "Name", value: name, inline: false },
+            ];
+          } else {
+            // Fallback for any other action type
+            statusMessage = `Your payment status has been updated to: **${
+              action || "Unknown"
+            }**`;
+
+            fields = [
+              { name: "Payment ID", value: uniqueID, inline: false },
+              { name: "Gheymat", value: gheymat, inline: true },
+              { name: "Admin", value: admin, inline: true },
+              {
+                name: "Note",
+                value: note || "No notes provided",
+                inline: false,
+              },
               {
                 name: "Status",
                 value: action ? action.toUpperCase() : "Unknown",
                 inline: true,
               },
-            ],
+              { name: "Sheba", value: sheba, inline: false },
+              { name: "Name", value: name, inline: false },
+            ];
+          }
+
+          // Create the embed to send
+          const embedToSend = {
+            color: embedColor,
+            title: embedTitle,
+            description: statusMessage,
+            fields: fields,
             footer: {
               text: `Processed on ${new Date().toLocaleString()}`,
               icon_url: message.author.displayAvatarURL(),
@@ -123,7 +142,7 @@ const transaction = async (message, client) => {
 
           await user.send({ embeds: [embedToSend] });
           console.log(
-            `Status update (${action}) sent to the user successfully with improved details!`
+            `Payment update (${action}) sent to the user successfully!`
           );
 
           // React to the message with a green checkmark
@@ -133,9 +152,11 @@ const transaction = async (message, client) => {
           if (paymentDuration === "1-3 saat" && action === "create") {
             const user1 = await client.users.fetch("339703905166426114");
             const user2 = await client.users.fetch("180032303303491584");
+
+            // Create notification embed for urgent payments
             const notificationEmbed = {
               color: 0xff0000, // Red color for notification
-              title: embedTitle, // Use the same title for consistency
+              title: "Immediate Payment Notification",
               description:
                 "A transaction with immediate payment duration has been created.",
               fields: [
@@ -160,6 +181,7 @@ const transaction = async (message, client) => {
               },
               timestamp: new Date(),
             };
+
             await user1.send({ embeds: [notificationEmbed] });
             await user2.send({ embeds: [notificationEmbed] });
             console.log(
